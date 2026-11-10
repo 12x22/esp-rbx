@@ -90,7 +90,7 @@ if not ScreenGui.Parent then ScreenGui.Parent = LocalPlayer:WaitForChild("Player
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 260, 0, 410)
+MainFrame.Size = UDim2.new(0, 260, 0, 310) -- Redimensionné pour être plus propre et compact
 MainFrame.Position = UDim2.new(0.1, 0, 0.2, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 15, 20)
 MainFrame.BorderSizePixel = 0
@@ -197,7 +197,7 @@ end)
 -- SLIDER TRANSPARENCE
 local TransLabel = Instance.new("TextLabel")
 TransLabel.Size = UDim2.new(0, 200, 0, 20)
-TransLabel.Position = UDim2.new(0, 30, 0, 145)
+TransLabel.Position = UDim2.new(0, 30, 0, 140)
 TransLabel.BackgroundTransparency = 1
 TransLabel.Text = "Transparence : 50%"
 TransLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -207,7 +207,7 @@ TransLabel.Parent = MainFrame
 
 local SliderFrame = Instance.new("Frame")
 SliderFrame.Size = UDim2.new(0, 200, 0, 8)
-SliderFrame.Position = UDim2.new(0, 30, 0, 170)
+SliderFrame.Position = UDim2.new(0, 30, 0, 165)
 SliderFrame.BackgroundColor3 = Color3.fromRGB(45, 35, 45)
 SliderFrame.BorderSizePixel = 0
 SliderFrame.Parent = MainFrame
@@ -250,24 +250,23 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- COLOR PICKER
+-- --- SYSTÈME COLOR PICKER CORRIGÉ AVEC UIGRADIENT ---
 local ColorLabel = Instance.new("TextLabel")
 ColorLabel.Size = UDim2.new(0, 200, 0, 20)
-ColorLabel.Position = UDim2.new(0, 30, 0, 195)
+ColorLabel.Position = UDim2.new(0, 30, 0, 190)
 ColorLabel.BackgroundTransparency = 1
-ColorLabel.Text = "Couleur des Ennemis (Clique sur la palette) :"
+ColorLabel.Text = "Couleur des Ennemis (Glisse sur la barre) :"
 ColorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 ColorLabel.Font = Enum.Font.Gotham
 ColorLabel.TextSize = 11
 ColorLabel.Parent = MainFrame
 
-local ColorPicker = Instance.new("ImageButton")
-ColorPicker.Size = UDim2.new(0, 200, 0, 150)
-ColorPicker.Position = UDim2.new(0, 30, 0, 225)
-ColorPicker.Image = "rbxassetid://14205567885"
+local ColorPicker = Instance.new("TextButton")
+ColorPicker.Size = UDim2.new(0, 200, 0, 25)
+ColorPicker.Position = UDim2.new(0, 30, 0, 215)
+ColorPicker.Text = ""
 ColorPicker.BorderSizePixel = 0
 ColorPicker.Parent = MainFrame
-local PickerCorner = Instance.new("UICorner")
-PickerCorner.CornerRadius = UDim.new(0, 8)
-PickerCorner.Parent = ColorPicker
 
+local PickerCorner = Instance.new("UICorner")
+PickerCorner.CornerRadius = UDim.new(0, 6)
