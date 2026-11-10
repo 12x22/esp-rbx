@@ -1,30 +1,25 @@
--- ESP HUB "Pink Edition" pour Solara (2026) - Touche RightShift intégrée
+-- ESP HUB "Pink Edition" pour Solara (2026) - Dédicace & Fonctions avancées
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local StarterGui = game:GetService("StarterGui")
 
--- Configuration des couleurs (Thème Rose / Violet)
+-- Message d'amour personnalisé dans sa console (F9)
+print("--------------------------------------------------")
+print("🌸 Pour ma bbtrickz, triche intelligemment bby 🌸")
+print("--------------------------------------------------")
+
+-- Configuration globale
 local Config = {
     Enabled = true,
     TeamCheck = false,
-    EnemyColor = Color3.fromRGB(255, 105, 180), -- Rose Flash (Hot Pink)
-    AllyColor = Color3.fromRGB(186, 85, 211)    -- Violet Doux (Medium Orchid)
+    EnemyColor = Color3.fromRGB(255, 105, 180),
+    AllyColor = Color3.fromRGB(186, 85, 211),
+    Transparency = 0.5
 }
 
--- Liste des couleurs si elle veut changer
-local ColorsTable = {
-    Color3.fromRGB(255, 105, 180), -- Rose
-    Color3.fromRGB(186, 85, 211), -- Violet
-    Color3.fromRGB(255, 192, 203), -- Rose Pastel
-    Color3.fromRGB(0, 255, 200),   -- Cyan
-    Color3.fromRGB(255, 255, 255)  -- Blanc
-}
-local enemyColorIndex = 1
-local allyColorIndex = 2
-
--- Gestion de l'ESP (Highlights de Roblox, parfait pour Solara)
+-- Gestion de l'ESP (Highlights de Roblox)
 local function UpdateESP(player)
     if not player or player == LocalPlayer then return end
     
@@ -41,7 +36,6 @@ local function UpdateESP(player)
             highlight = Instance.new("Highlight")
             highlight.Name = "Solara_Pink_ESP"
             highlight.Parent = character
-            highlight.FillTransparency = 0.5
             highlight.OutlineTransparency = 0
             highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
             highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
@@ -50,6 +44,8 @@ local function UpdateESP(player)
 
         local function RefreshColor()
             if not highlight or not highlight.Parent or not player or not LocalPlayer then return end
+            highlight.FillTransparency = Config.Transparency
+            
             local success, sameTeam = pcall(function()
                 return Config.TeamCheck and player.Team == LocalPlayer.Team and player.Team ~= nil
             end)
@@ -85,18 +81,17 @@ end
 
 Players.PlayerAdded:Connect(UpdateESP)
 
--- INTERFACE GRAPHIQUE (UI) - THÈME CHIC ROSE & NOIR
+-- INTERFACE GRAPHIQUE (UI)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "SolaraPinkHub"
 ScreenGui.ResetOnSpawn = false
 pcall(function() ScreenGui.Parent = CoreGui end)
 if not ScreenGui.Parent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
 
--- Fenêtre Principale
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 240, 0, 280)
-MainFrame.Position = UDim2.new(0.1, 0, 0.3, 0)
+MainFrame.Size = UDim2.new(0, 260, 0, 410)
+MainFrame.Position = UDim2.new(0.1, 0, 0.2, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 15, 20)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -106,20 +101,18 @@ local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 12)
 UICorner.Parent = MainFrame
 
--- Petite barre décorative rose en haut
 local TopBar = Instance.new("Frame")
 TopBar.Size = UDim2.new(1, 0, 0, 4)
-TopBar.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+TopBar.BackgroundColor3 = Config.EnemyColor
 TopBar.BorderSizePixel = 0
 TopBar.Parent = MainFrame
 local TopCorner = Instance.new("UICorner")
 TopCorner.CornerRadius = UDim.new(0, 12)
 TopCorner.Parent = TopBar
 
--- Système de Drag simple et sécurisé pour Solara
+-- Système de Drag
 local dragging = false
 local dragStart, startPos
-
 MainFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
@@ -127,39 +120,36 @@ MainFrame.InputBegan:Connect(function(input)
         startPos = MainFrame.Position
     end
 end)
-
 UserInputService.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
         MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 end)
-
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = false
     end
 end)
 
--- Gestion de la touche Right Shift pour afficher/masquer le menu
+-- Right Shift Toggle
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if not gameProcessed and input.KeyCode == Enum.KeyCode.RightShift then
         MainFrame.Visible = not MainFrame.Visible
     end
 end)
 
--- Titre du Menu
+-- Titre
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Position = UDim2.new(0, 0, 0, 5)
 Title.BackgroundTransparency = 1
-Title.Text = "🌸 PINK ESP HUB 🌸"
+Title.Text = "🦇 4_6 HUB 🦇"
 Title.TextColor3 = Color3.fromRGB(255, 105, 180)
 Title.TextSize = 14
 Title.Font = Enum.Font.GothamBold
 Title.Parent = MainFrame
 
--- Fonction pour créer de jolis boutons arrondis
 local function CreateButton(text, position, size, baseColor, callback)
     local Btn = Instance.new("TextButton")
     Btn.Size = size
@@ -171,17 +161,14 @@ local function CreateButton(text, position, size, baseColor, callback)
     Btn.TextSize = 12
     Btn.BorderSizePixel = 0
     Btn.Parent = MainFrame
-    
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 8)
     Corner.Parent = Btn
-    
     Btn.MouseButton1Click:Connect(callback)
     return Btn
 end
 
--- Bouton d'activation globale
-local ToggleESP = CreateButton("ESP : ACTIVÉ", UDim2.new(0, 20, 0, 55), UDim2.new(0, 200, 0, 35), Color3.fromRGB(255, 105, 180), function() end)
+local ToggleESP = CreateButton("ESP : ACTIVÉ", UDim2.new(0, 30, 0, 50), UDim2.new(0, 200, 0, 35), Color3.fromRGB(255, 105, 180), function() end)
 ToggleESP.MouseButton1Click:Connect(function()
     Config.Enabled = not Config.Enabled
     if Config.Enabled then
@@ -194,8 +181,7 @@ ToggleESP.MouseButton1Click:Connect(function()
     RefreshAllESP()
 end)
 
--- Bouton Team Check
-local ToggleTeam = CreateButton("TEAM CHECK : DÉSACTIVÉ", UDim2.new(0, 20, 0, 105), UDim2.new(0, 200, 0, 35), Color3.fromRGB(50, 40, 45), function() end)
+local ToggleTeam = CreateButton("TEAM CHECK : DÉSACTIVÉ", UDim2.new(0, 30, 0, 95), UDim2.new(0, 200, 0, 35), Color3.fromRGB(50, 40, 45), function() end)
 ToggleTeam.MouseButton1Click:Connect(function()
     Config.TeamCheck = not Config.TeamCheck
     if Config.TeamCheck then
@@ -208,27 +194,80 @@ ToggleTeam.MouseButton1Click:Connect(function()
     RefreshAllESP()
 end)
 
--- Changement couleur principale
-local EnemyColorBtn = CreateButton("Changer Couleur principale", UDim2.new(0, 20, 0, 165), UDim2.new(0, 200, 0, 35), Color3.fromRGB(35, 30, 35), function()
-    enemyColorIndex = enemyColorIndex % #ColorsTable + 1
-    Config.EnemyColor = ColorsTable[enemyColorIndex]
-    RefreshAllESP()
+-- SLIDER TRANSPARENCE
+local TransLabel = Instance.new("TextLabel")
+TransLabel.Size = UDim2.new(0, 200, 0, 20)
+TransLabel.Position = UDim2.new(0, 30, 0, 145)
+TransLabel.BackgroundTransparency = 1
+TransLabel.Text = "Transparence : 50%"
+TransLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TransLabel.Font = Enum.Font.Gotham
+TransLabel.TextSize = 11
+TransLabel.Parent = MainFrame
+
+local SliderFrame = Instance.new("Frame")
+SliderFrame.Size = UDim2.new(0, 200, 0, 8)
+SliderFrame.Position = UDim2.new(0, 30, 0, 170)
+SliderFrame.BackgroundColor3 = Color3.fromRGB(45, 35, 45)
+SliderFrame.BorderSizePixel = 0
+SliderFrame.Parent = MainFrame
+local SliderCorner = Instance.new("UICorner")
+SliderCorner.CornerRadius = UDim.new(0, 4)
+SliderCorner.Parent = SliderFrame
+
+local SliderButton = Instance.new("TextButton")
+SliderButton.Size = UDim2.new(0, 16, 0, 16)
+SliderButton.Position = UDim2.new(0.5, -8, 0, -4)
+SliderButton.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+SliderButton.Text = ""
+SliderButton.Parent = SliderFrame
+local BtnCorner = Instance.new("UICorner")
+BtnCorner.CornerRadius = UDim.new(1, 0)
+BtnCorner.Parent = SliderButton
+
+local sliderDragging = false
+SliderButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        sliderDragging = true
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        sliderDragging = false
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if sliderDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local mousePos = input.Position.X
+        local frameLeft = SliderFrame.AbsolutePosition.X
+        local frameWidth = SliderFrame.AbsoluteSize.X
+        local percentage = math.clamp((mousePos - frameLeft) / frameWidth, 0, 1)
+        
+        SliderButton.Position = UDim2.new(percentage, -8, 0, -4)
+        Config.Transparency = percentage
+        TransLabel.Text = "Transparence : " .. math.floor(percentage * 100) .. "%"
+        RefreshAllESP()
+    end
 end)
 
--- Changement couleur Allié
-local AllyColorBtn = CreateButton("Changer Couleur alliés", UDim2.new(0, 20, 0, 215), UDim2.new(0, 200, 0, 35), Color3.fromRGB(35, 30, 35), function()
-    allyColorIndex = allyColorIndex % #ColorsTable + 1
-    Config.AllyColor = ColorsTable[allyColorIndex]
-    RefreshAllESP()
-end)
+-- COLOR PICKER
+local ColorLabel = Instance.new("TextLabel")
+ColorLabel.Size = UDim2.new(0, 200, 0, 20)
+ColorLabel.Position = UDim2.new(0, 30, 0, 195)
+ColorLabel.BackgroundTransparency = 1
+ColorLabel.Text = "Couleur des Ennemis (Clique sur la palette) :"
+ColorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+ColorLabel.Font = Enum.Font.Gotham
+ColorLabel.TextSize = 11
+ColorLabel.Parent = MainFrame
 
-RefreshAllESP()
+local ColorPicker = Instance.new("ImageButton")
+ColorPicker.Size = UDim2.new(0, 200, 0, 150)
+ColorPicker.Position = UDim2.new(0, 30, 0, 225)
+ColorPicker.Image = "rbxassetid://14205567885"
+ColorPicker.BorderSizePixel = 0
+ColorPicker.Parent = MainFrame
+local PickerCorner = Instance.new("UICorner")
+PickerCorner.CornerRadius = UDim.new(0, 8)
+PickerCorner.Parent = ColorPicker
 
--- Petite notification système pour lui confirmer le lancement
-pcall(function()
-    StarterGui:SetCore("SendNotification", {
-        Title = "Pink Hub Chargé !";
-        Text = "Appuie sur 'Right Shift' pour masquer/ouvrir le menu.";
-        Duration = 5;
-    })
-end)
