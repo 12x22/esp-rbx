@@ -1,9 +1,10 @@
--- ESP HUB "Pink Edition" pour Solara (2026) - Dédicace & Fonctions avancées
+-- ESP HUB "Pink Edition" pour Solara (2026) - Version 4 "Discrète"
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local StarterGui = game:GetService("StarterGui")
+local Lighting = game:GetService("Lighting")
 
 -- Message d'amour personnalisé dans sa console (F9)
 print("--------------------------------------------------")
@@ -16,8 +17,36 @@ local Config = {
     TeamCheck = false,
     EnemyColor = Color3.fromRGB(255, 105, 180),
     AllyColor = Color3.fromRGB(186, 85, 211),
-    Transparency = 0.5
+    Transparency = 0.5,
+    FullBright = false,
+    NoFog = false,
+    Streamproof = false
 }
+
+-- Sauvegarde des paramètres de lumière d'origine du jeu
+local OriginalLighting = {
+    Ambient = Lighting.Ambient,
+    OutdoorAmbient = Lighting.OutdoorAmbient,
+    Brightness = Lighting.Brightness,
+    ClockTime = Lighting.ClockTime,
+    FogEnd = Lighting.FogEnd,
+    FogStart = Lighting.FogStart
+}
+
+-- Boucle pour forcer les modifications de l'Ambiancer et No Fog
+local LightingConnection
+LightingConnection = game:GetService("RunService").RenderStepped:Connect(function()
+    if Config.FullBright then
+        Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+        Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+        Lighting.Brightness = 3
+        Lighting.ClockTime = 12
+    end
+    if Config.NoFog then
+        Lighting.FogStart = 999999
+        Lighting.FogEnd = 999999
+    end
+end)
 
 -- Gestion de l'ESP (Highlights de Roblox)
 local function UpdateESP(player)
@@ -90,7 +119,7 @@ if not ScreenGui.Parent then ScreenGui.Parent = LocalPlayer:WaitForChild("Player
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 260, 0, 310) -- Redimensionné pour être plus propre et compact
+MainFrame.Size = UDim2.new(0, 260, 0, 480) -- Taille augmentée pour intégrer proprement No Fog et visuels
 MainFrame.Position = UDim2.new(0.1, 0, 0.2, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 15, 20)
 MainFrame.BorderSizePixel = 0
@@ -132,10 +161,34 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- Right Shift Toggle
+-- Fonction de nettoyage d'urgence (Panic Function)
+local function PanicUnload()
+    Config.Enabled = false
+    Config.FullBright = false
+    Config.NoFog = false
+    RefreshAllESP()
+    if LightingConnection then LightingConnection:Disconnect() end
+    
+    -- Restauration des lumières d'origine
+    Lighting.Ambient = OriginalLighting.Ambient
+    Lighting.OutdoorAmbient = OriginalLighting.OutdoorAmbient
+    Lighting.Brightness = OriginalLighting.Brightness
+    Lighting.ClockTime = OriginalLighting.ClockTime
+    Lighting.FogStart = OriginalLighting.FogStart
+    Lighting.FogEnd = OriginalLighting.FogEnd
+    
+    -- Destruction de l'interface graphique
+    ScreenGui:Destroy()
+end
+
+-- Gestion des touches clavier (Right Shift = Masquer / End = Panique Totale)
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.KeyCode == Enum.KeyCode.RightShift then
-        MainFrame.Visible = not MainFrame.Visible
+    if not gameProcessed then
+        if input.KeyCode == Enum.KeyCode.RightShift then
+            MainFrame.Visible = not MainFrame.Visible
+        elseif input.KeyCode == Enum.KeyCode.End then
+            PanicUnload()
+        end
     end
 end)
 
@@ -144,7 +197,7 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Position = UDim2.new(0, 0, 0, 5)
 Title.BackgroundTransparency = 1
-Title.Text = "🦇 4_6 HUB 🦇"
+Title.Text = "🦇 4_6 HUB v4 🦇"
 Title.TextColor3 = Color3.fromRGB(255, 105, 180)
 Title.TextSize = 14
 Title.Font = Enum.Font.GothamBold
@@ -168,7 +221,8 @@ local function CreateButton(text, position, size, baseColor, callback)
     return Btn
 end
 
-local ToggleESP = CreateButton("ESP : ACTIVÉ", UDim2.new(0, 30, 0, 50), UDim2.new(0, 200, 0, 35), Color3.fromRGB(255, 105, 180), function() end)
+-- Boutons de Contrôle
+local ToggleESP = CreateButton("ESP : ACTIVÉ", UDim2.new(0, 30, 0, 50), UDim2.new(0, 200, 0, 32), Color3.fromRGB(255, 105, 180), function() end)
 ToggleESP.MouseButton1Click:Connect(function()
     Config.Enabled = not Config.Enabled
     if Config.Enabled then
@@ -181,7 +235,7 @@ ToggleESP.MouseButton1Click:Connect(function()
     RefreshAllESP()
 end)
 
-local ToggleTeam = CreateButton("TEAM CHECK : DÉSACTIVÉ", UDim2.new(0, 30, 0, 95), UDim2.new(0, 200, 0, 35), Color3.fromRGB(50, 40, 45), function() end)
+local ToggleTeam = CreateButton("TEAM CHECK : DÉSACTIVÉ", UDim2.new(0, 30, 0, 90), UDim2.new(0, 200, 0, 32), Color3.fromRGB(50, 40, 45), function() end)
 ToggleTeam.MouseButton1Click:Connect(function()
     Config.TeamCheck = not Config.TeamCheck
     if Config.TeamCheck then
@@ -194,79 +248,27 @@ ToggleTeam.MouseButton1Click:Connect(function()
     RefreshAllESP()
 end)
 
--- SLIDER TRANSPARENCE
-local TransLabel = Instance.new("TextLabel")
-TransLabel.Size = UDim2.new(0, 200, 0, 20)
-TransLabel.Position = UDim2.new(0, 30, 0, 140)
-TransLabel.BackgroundTransparency = 1
-TransLabel.Text = "Transparence : 50%"
-TransLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TransLabel.Font = Enum.Font.Gotham
-TransLabel.TextSize = 11
-TransLabel.Parent = MainFrame
-
-local SliderFrame = Instance.new("Frame")
-SliderFrame.Size = UDim2.new(0, 200, 0, 8)
-SliderFrame.Position = UDim2.new(0, 30, 0, 165)
-SliderFrame.BackgroundColor3 = Color3.fromRGB(45, 35, 45)
-SliderFrame.BorderSizePixel = 0
-SliderFrame.Parent = MainFrame
-local SliderCorner = Instance.new("UICorner")
-SliderCorner.CornerRadius = UDim.new(0, 4)
-SliderCorner.Parent = SliderFrame
-
-local SliderButton = Instance.new("TextButton")
-SliderButton.Size = UDim2.new(0, 16, 0, 16)
-SliderButton.Position = UDim2.new(0.5, -8, 0, -4)
-SliderButton.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
-SliderButton.Text = ""
-SliderButton.Parent = SliderFrame
-local BtnCorner = Instance.new("UICorner")
-BtnCorner.CornerRadius = UDim.new(1, 0)
-BtnCorner.Parent = SliderButton
-
-local sliderDragging = false
-SliderButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        sliderDragging = true
-    end
-end)
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        sliderDragging = false
-    end
-end)
-UserInputService.InputChanged:Connect(function(input)
-    if sliderDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local mousePos = input.Position.X
-        local frameLeft = SliderFrame.AbsolutePosition.X
-        local frameWidth = SliderFrame.AbsoluteSize.X
-        local percentage = math.clamp((mousePos - frameLeft) / frameWidth, 0, 1)
-        
-        SliderButton.Position = UDim2.new(percentage, -8, 0, -4)
-        Config.Transparency = percentage
-        TransLabel.Text = "Transparence : " .. math.floor(percentage * 100) .. "%"
-        RefreshAllESP()
+local ToggleBright = CreateButton("AMBIANCER : DÉSACTIVÉ", UDim2.new(0, 30, 0, 130), UDim2.new(0, 200, 0, 32), Color3.fromRGB(50, 40, 45), function() end)
+ToggleBright.MouseButton1Click:Connect(function()
+    Config.FullBright = not Config.FullBright
+    if Config.FullBright then
+        ToggleBright.Text = "AMBIANCER : MAX LUMENS"
+        ToggleBright.BackgroundColor3 = Color3.fromRGB(255, 140, 0)
+    else
+        ToggleBright.Text = "AMBIANCER : DÉSACTIVÉ"
+        ToggleBright.BackgroundColor3 = Color3.fromRGB(50, 40, 45)
+        Lighting.Ambient = OriginalLighting.Ambient
+        Lighting.OutdoorAmbient = OriginalLighting.OutdoorAmbient
+        Lighting.Brightness = OriginalLighting.Brightness
+        Lighting.ClockTime = OriginalLighting.ClockTime
     end
 end)
 
--- --- SYSTÈME COLOR PICKER CORRIGÉ AVEC UIGRADIENT ---
-local ColorLabel = Instance.new("TextLabel")
-ColorLabel.Size = UDim2.new(0, 200, 0, 20)
-ColorLabel.Position = UDim2.new(0, 30, 0, 190)
-ColorLabel.BackgroundTransparency = 1
-ColorLabel.Text = "Couleur des Ennemis (Glisse sur la barre) :"
-ColorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-ColorLabel.Font = Enum.Font.Gotham
-ColorLabel.TextSize = 11
-ColorLabel.Parent = MainFrame
-
-local ColorPicker = Instance.new("TextButton")
-ColorPicker.Size = UDim2.new(0, 200, 0, 25)
-ColorPicker.Position = UDim2.new(0, 30, 0, 215)
-ColorPicker.Text = ""
-ColorPicker.BorderSizePixel = 0
-ColorPicker.Parent = MainFrame
-
-local PickerCorner = Instance.new("UICorner")
-PickerCorner.CornerRadius = UDim.new(0, 6)
+local ToggleFog = CreateButton("NO FOG : DÉSACTIVÉ", UDim2.new(0, 30, 0, 170), UDim2.new(0, 200, 0, 32), Color3.fromRGB(50, 40, 45), function() end)
+ToggleFog.MouseButton1Click:Connect(function()
+    Config.NoFog = not Config.NoFog
+    if Config.NoFog then
+        ToggleFog.Text = "NO FOG : ACTIVÉ"
+        ToggleFog.BackgroundColor3 = Color3.fromRGB(0, 180, 150)
+    else
+        ToggleFog.Text = "NO FOG : DÉSACTIVÉ"
