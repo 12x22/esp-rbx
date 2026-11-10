@@ -1,13 +1,14 @@
--- ESP HUB "Pink Edition" pour Solara (2026)
+-- ESP HUB "Pink Edition" pour Solara (2026) - Touche RightShift intégrée
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
 
 -- Configuration des couleurs (Thème Rose / Violet)
 local Config = {
     Enabled = true,
-    TeamCheck = false, -- Désactivé par défaut pour tout voir en rose !
+    TeamCheck = false,
     EnemyColor = Color3.fromRGB(255, 105, 180), -- Rose Flash (Hot Pink)
     AllyColor = Color3.fromRGB(186, 85, 211)    -- Violet Doux (Medium Orchid)
 }
@@ -42,7 +43,7 @@ local function UpdateESP(player)
             highlight.Parent = character
             highlight.FillTransparency = 0.5
             highlight.OutlineTransparency = 0
-            highlight.OutlineColor = Color3.fromRGB(255, 255, 255) -- Borde Blanco
+            highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
             highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
             highlight.Adornee = character
         end
@@ -96,7 +97,7 @@ local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 240, 0, 280)
 MainFrame.Position = UDim2.new(0.1, 0, 0.3, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 15, 20) -- Noir avec une touche de violet
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 15, 20)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Parent = ScreenGui
@@ -137,6 +138,13 @@ end)
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = false
+    end
+end)
+
+-- Gestion de la touche Right Shift pour afficher/masquer le menu
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.RightShift then
+        MainFrame.Visible = not MainFrame.Visible
     end
 end)
 
@@ -200,7 +208,7 @@ ToggleTeam.MouseButton1Click:Connect(function()
     RefreshAllESP()
 end)
 
--- Changement couleur Ennemi
+-- Changement couleur principale
 local EnemyColorBtn = CreateButton("Changer Couleur principale", UDim2.new(0, 20, 0, 165), UDim2.new(0, 200, 0, 35), Color3.fromRGB(35, 30, 35), function()
     enemyColorIndex = enemyColorIndex % #ColorsTable + 1
     Config.EnemyColor = ColorsTable[enemyColorIndex]
@@ -215,3 +223,12 @@ local AllyColorBtn = CreateButton("Changer Couleur alliés", UDim2.new(0, 20, 0,
 end)
 
 RefreshAllESP()
+
+-- Petite notification système pour lui confirmer le lancement
+pcall(function()
+    StarterGui:SetCore("SendNotification", {
+        Title = "Pink Hub Chargé !";
+        Text = "Appuie sur 'Right Shift' pour masquer/ouvrir le menu.";
+        Duration = 5;
+    })
+end)
