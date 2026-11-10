@@ -1,7 +1,6 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local CoreGui = game:GetService("CoreGui")
-local TweenService = game:GetService("TweenService")
 
 -- Configuration de base
 local Config = {
@@ -11,7 +10,7 @@ local Config = {
     AllyColor = Color3.fromRGB(0, 150, 255)
 }
 
--- Liste des couleurs disponibles (Rouge, Bleu, Vert, Jaune, Violet)
+-- Liste des couleurs disponibles
 local ColorsTable = {
     Color3.fromRGB(255, 0, 50),
     Color3.fromRGB(0, 150, 255),
@@ -22,12 +21,14 @@ local ColorsTable = {
 local enemyColorIndex = 1
 local allyColorIndex = 2
 
--- Gestion de l'ESP
+-- Gestion de l'ESP sécurisée
 local function UpdateESP(player)
-    if player == LocalPlayer then return end
+    if not player or player == LocalPlayer then return end
     
     local function SetupHighlight(character)
+        if not character then return end
         local highlight = character:FindFirstChild("Hub_ESP")
+        
         if not Config.Enabled then
             if highlight then highlight:Destroy() end
             return
@@ -45,8 +46,13 @@ local function UpdateESP(player)
         end
 
         local function RefreshColor()
-            if not highlight or not highlight.Parent then return end
-            if Config.TeamCheck and player.Team == LocalPlayer.Team and player.Team ~= nil then
+            if not highlight or not highlight.Parent or not player or not LocalPlayer then return end
+            -- Vérification d'équipe sécurisée
+            local success, sameTeam = pcall(function()
+                return Config.TeamCheck and player.Team == LocalPlayer.Team and player.Team ~= nil
+            end)
+            
+            if success and sameTeam then
                 highlight.FillColor = Config.AllyColor
             else
                 highlight.FillColor = Config.EnemyColor
@@ -54,8 +60,12 @@ local function UpdateESP(player)
         end
 
         RefreshColor()
-        player:GetPropertyChangedSignal("Team"):Connect(RefreshColor)
-        LocalPlayer:GetPropertyChangedSignal("Team"):Connect(RefreshColor)
+        
+        -- Connexions sécurisées (évite le crash "index nil")
+        pcall(function()
+            player:GetPropertyChangedSignal("Team"):Connect(RefreshColor)
+            LocalPlayer:GetPropertyChangedSignal("Team"):Connect(RefreshColor)
+        end)
     end
 
     if player.Character then SetupHighlight(player.Character) end
@@ -78,7 +88,6 @@ Players.PlayerAdded:Connect(UpdateESP)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "WallhackHub"
 ScreenGui.ResetOnSpawn = false
--- Protection anti-détection basique pour CoreGui
 pcall(function() ScreenGui.Parent = CoreGui end)
 if not ScreenGui.Parent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
 
@@ -107,7 +116,6 @@ Title.TextSize = 16
 Title.Font = Enum.Font.GothamBold
 Title.Parent = MainFrame
 
--- Fonction pour créer des boutons stylisés
 local function CreateButton(text, position, size, callback)
     local Btn = Instance.new("TextButton")
     Btn.Size = size
@@ -128,7 +136,6 @@ local function CreateButton(text, position, size, callback)
     return Btn
 end
 
--- 1. Bouton Activer / Désactiver l'ESP
 local ToggleESP = CreateButton("ESP : ACTIVÉ", UDim2.new(0, 25, 0, 60), UDim2.new(0, 200, 0, 40), function() end)
 ToggleESP.BackgroundColor3 = Color3.fromRGB(0, 180, 80)
 ToggleESP.MouseButton1Click:Connect(function()
@@ -143,7 +150,6 @@ ToggleESP.MouseButton1Click:Connect(function()
     RefreshAllESP()
 end)
 
--- 2. Bouton Team Check
 local ToggleTeam = CreateButton("TEAM CHECK : ACTIVÉ", UDim2.new(0, 25, 0, 115), UDim2.new(0, 200, 0, 40), function() end)
 ToggleTeam.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
 ToggleTeam.MouseButton1Click:Connect(function()
@@ -158,19 +164,16 @@ ToggleTeam.MouseButton1Click:Connect(function()
     RefreshAllESP()
 end)
 
--- 3. Changement couleur Ennemis
 local EnemyColorBtn = CreateButton("Couleur Ennemi", UDim2.new(0, 25, 0, 175), UDim2.new(0, 200, 0, 40), function()
     enemyColorIndex = enemyColorIndex % #ColorsTable + 1
     Config.EnemyColor = ColorsTable[enemyColorIndex]
     RefreshAllESP()
 end)
 
--- 4. Changement couleur Alliés
 local AllyColorBtn = CreateButton("Couleur Allié", UDim2.new(0, 25, 0, 230), UDim2.new(0, 200, 0, 40), function()
     allyColorIndex = allyColorIndex % #ColorsTable + 1
     Config.AllyColor = ColorsTable[allyColorIndex]
     RefreshAllESP()
 end)
 
--- Lancement initial
 RefreshAllESP()
